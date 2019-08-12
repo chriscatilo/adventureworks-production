@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace AdWorks.Production.Management.WebApi.Controllers
 {
@@ -38,19 +40,37 @@ namespace AdWorks.Production.Management.WebApi.Controllers
             return Ok();
         }
     }
-    public class Body
+    public class Body : ValueStore
     {
-        private readonly Dictionary<string, string> _dictionary = new Dictionary<string, string>();
-
         public string Name
         {
-            get => _dictionary.TryGetValue(nameof(Name), out var value) ? value : null;
-            set => _dictionary[nameof(Name)] = value;
+            get => Get<string>(nameof(Name));
+            set => Set(nameof(Name), value);
         }
         public int? Foo
         {
-            get => _dictionary.TryGetValue(nameof(Foo), out var value) ? int.Parse(value) : default(int?);
-            set => _dictionary[nameof(Name)] = value.ToString();
+            get => Get<int?>(nameof(Foo));
+            set => Set(nameof(Foo), value);
+        }
+    }
+
+    public abstract class ValueStore
+    {
+        private readonly IDictionary<string, dynamic> _dictionary = new ConcurrentDictionary<string, dynamic>();
+
+        protected TValue Get<TValue>(string key)
+        {
+            return _dictionary.TryGetValue(key, out dynamic value) ? (TValue)value : default(TValue);
+        }
+
+        protected void Set<TValue>(string key, TValue value)
+        {
+            _dictionary[key] = value;
+        }
+
+        public IReadOnlyDictionary<string, dynamic> ToReadOnlyDictionary()
+        {
+            return _dictionary.ToImmutableDictionary();
         }
     }
 }
