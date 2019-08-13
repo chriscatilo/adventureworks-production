@@ -51,43 +51,42 @@ namespace AdWorks.Production.Management.WebApi.ProductModels
 
             return Ok();
         }
+
+        public class Body : ValueStore
+        {
+            [Description("Product model name.")]
+            public string Name
+            {
+                get => Get<string>(nameof(Name));
+                set => Set(nameof(Name), value);
+            }
+
+            [Description("Product model catalog description.")]
+            public string CatalogDescription
+            {
+                get => Get<string>(nameof(CatalogDescription));
+                set => Set(nameof(CatalogDescription), value);
+            }
+        }
+
+        public abstract class ValueStore
+        {
+            private readonly IDictionary<string, dynamic> _dictionary = new ConcurrentDictionary<string, dynamic>();
+
+            protected TValue Get<TValue>(string key)
+            {
+                return _dictionary.TryGetValue(key, out dynamic value) ? (TValue)value : default(TValue);
+            }
+
+            protected void Set<TValue>(string key, TValue value)
+            {
+                _dictionary[key] = value;
+            }
+
+            public IReadOnlyDictionary<string, dynamic> ToReadOnlyDictionary()
+            {
+                return _dictionary.ToImmutableDictionary();
+            }
+        }
     }
-
-    public class Body : ValueStore
-    {
-        [Description("Product model name.")]
-        public string Name
-        {
-            get => Get<string>(nameof(Name));
-            set => Set(nameof(Name), value);
-        }
-
-        [Description("Product model catalog description.")]
-        public string CatalogDescription
-        {
-            get => Get<string>(nameof(CatalogDescription));
-            set => Set(nameof(CatalogDescription), value);
-        }
-    }
-
-    public abstract class ValueStore
-    {
-        private readonly IDictionary<string, dynamic> _dictionary = new ConcurrentDictionary<string, dynamic>();
-
-        protected TValue Get<TValue>(string key)
-        {
-            return _dictionary.TryGetValue(key, out dynamic value) ? (TValue)value : default(TValue);
-        }
-
-        protected void Set<TValue>(string key, TValue value)
-        {
-            _dictionary[key] = value;
-        }
-
-        public IReadOnlyDictionary<string, dynamic> ToReadOnlyDictionary()
-        {
-            return _dictionary.ToImmutableDictionary();
-        }
-    }
-    
 }
