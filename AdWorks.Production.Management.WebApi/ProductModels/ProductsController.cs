@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AdWorks.Production.Management.WebApi.Controllers
+namespace AdWorks.Production.Management.WebApi.ProductModels
 {
+    using static ModelsRepo;
 
     [
         Produces("application/json"), 
@@ -12,20 +13,13 @@ namespace AdWorks.Production.Management.WebApi.Controllers
         Route("api/[controller]"), 
         ApiController
     ]
-    public partial class ProductsController : ControllerBase
+    public class ProductsController : ControllerBase
     {
-        private static readonly IList<ProductModel> Models = new List<ProductModel>
-        {
-            new ProductModel() { Id = 1, Name = "Foo" },
-            new ProductModel() { Id = 2, Name = "Bar" },
-            new ProductModel() { Id = 3, Name = "Qux" }
-        };
-
 
         [HttpGet("models")]
         public ActionResult<IEnumerable<ProductModel>> Get()
         {
-            return Ok(Models);
+            return Ok(ModelsRepo.Models);
         }
 
         /// <summary>
@@ -36,7 +30,7 @@ namespace AdWorks.Production.Management.WebApi.Controllers
         [HttpGet("models/{id}")]
         public ActionResult<ProductModel> Get(int id)
         {
-            var model = Models.FirstOrDefault(_ => _.Id == id);
+            var model = ModelsRepo.Models.FirstOrDefault(_ => _.Id == id);
 
             if (model == null)
             {
@@ -49,7 +43,7 @@ namespace AdWorks.Production.Management.WebApi.Controllers
         [HttpPost("models")]
         public ActionResult Post(ProductModel model)
         {
-            Models.Add(model);
+            ModelsRepo.Models.Add(model);
 
             return Ok();
         }
@@ -57,14 +51,14 @@ namespace AdWorks.Production.Management.WebApi.Controllers
         [HttpDelete("/models/{id}")]
         public ActionResult Delete(int id)
         {
-            var model = Models.FirstOrDefault(_ => _.Id == id);
+            var model = ModelsRepo.Models.FirstOrDefault(_ => _.Id == id);
 
             if (model == null)
             {
                 return NotFound();
             }
 
-            Models.Remove(model);
+            ModelsRepo.Models.Remove(model);
 
             return Ok();
         }

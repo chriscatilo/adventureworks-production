@@ -9,5 +9,6 @@ namespace AdWorks.Production.Management.WebApi.Core.Domain
         [Required]
         public string Name { get; set; }
 
+        public string CatalogDescription { get; set; }
     }
 }
