@@ -1,12 +1,12 @@
 ﻿using AdWorks.Production.Management.WebApi.Core.Domain;
+using AdWorks.Production.Management.WebApi.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AdWorks.Production.Management.WebApi.ProductModels
 {
-    using static ModelsRepo;
-
     [
         Produces("application/json"), 
         Consumes("application/json"),
@@ -15,11 +15,20 @@ namespace AdWorks.Production.Management.WebApi.ProductModels
     ]
     public class ProductsController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public ProductsController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
 
         [HttpGet("models")]
-        public ActionResult<IEnumerable<ProductModel>> Get()
+        public async Task<dynamic> Get()
         {
-            return Ok(ModelsRepo.Models);
+            var models = await _mediator.Send(new ProductModelQueries.QueryAll());
+
+            return Ok(models);
         }
 
         /// <summary>
@@ -28,9 +37,9 @@ namespace AdWorks.Production.Management.WebApi.ProductModels
         /// <param name="id">Identifier</param>
         /// <returns>Product model</returns>
         [HttpGet("models/{id}")]
-        public ActionResult<ProductModel> Get(int id)
+        public async Task<dynamic> Get(int id)
         {
-            var model = ModelsRepo.Models.FirstOrDefault(_ => _.Id == id);
+            var model = await _mediator.Send(new ProductModelQueries.QueryById {Id = id});
 
             if (model == null)
             {
@@ -41,9 +50,9 @@ namespace AdWorks.Production.Management.WebApi.ProductModels
         }
 
         [HttpPost("models")]
-        public ActionResult Post(ProductModel model)
+        public async Task<dynamic> Post(ProductModel model)
         {
-            ModelsRepo.Models.Add(model);
+            await _mediator.Send(new ProductModelCommands.Add {Model = model});
 
             return Ok();
         }
